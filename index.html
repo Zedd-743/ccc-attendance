@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Attendance System - Login</title>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <img src="images/logo.png" alt="logo">
+        </div>
+        
+        <h1>Login</h1>
+
+        <button id="toggleLoginMethod">Switch to Manual Login</button>
+
+        <div id="manualLogin" style="display:none;">
+            <input type="text" id="manualCodeInput" placeholder="Enter Manual Code">
+            <button onclick="manualLogin()">Log In</button>
+            <p id="manualLoginError" class="error"></p>
+        </div>
+
+        <!-- Barcode login section -->
+        <div id="barcodeLogin">
+            <!-- Input field to display the scanned barcode -->
+           <input type="password" id="barcodeInput" placeholder="Scan Barcode" autofocus disabled />
+<input type="hidden" id="hiddenBarcode" name="barcode" />
+
+            <!-- Button to start scanning -->
+            <button id="startScanBtn">Start Scanning</button>
+        </div>
+    </div>
+
+    <!-- External scripts -->
+    <script src="barcodeScanner.js"></script>
+</body>
+</html>
