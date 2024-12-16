@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Professor Dashboard</title>
+    <!-- Link to the external stylesheet for styling the dashboard -->
+    <link rel="stylesheet" href="boardstyle.css">
+</head>
+<body>
+    <!-- Navbar Section -->
+    <header>
+        <nav>
+            <!-- Logo Image -->
+             <a href="/dashboard"><img src="images/logo.png" alt="Logo" class="logo"></a>
+            <!-- Dynamic Welcome Text displaying professor's name -->
+            <span class="welcome-text">Welcome,{{professorName}}</span>
+        </nav>
+    </header>
+    
+    <div class="dashboard-container">
+        <!-- Sidebar Section for Navigation -->
+        <aside class="sidebar">
+            <ul>
+                <li class="sidebar-item"><a href="/dashboard">Dashboard</a></li>
+                <li class="sidebar-item"><a href="/schedule">Schedule</a></li>
+                <li class="sidebar-item"><a href="/dashboard-attendance">Attendance</a></li>
+                <li class="sidebar-item"><a href="/scanner">Scanner</a></li>
+                <li class="sidebar-item"><a href="/student-list">Student List</a></li>
+                <li class="sidebar-item"><a href="/logout" id="logout">Log out</a></li>
+            </ul>
+        </aside>
+
+         <!-- Main Content Section -->
+       <main class="main-content">
+        {{#if errorMessage}}
+    <div class="error-message">{{errorMessage}}</div>
+{{/if}}
+    <div id="controls">
+        <h2>Calendar</h2>
+        <div>
+            <label for="fiscalYear">Fiscal Year:</label>
+            <select id="fiscalYear"></select>
+             <label for="Semester">Semester</label>
+            <select id="semester">
+  semester
+</select>
+
+        </div>
+    </div>
+    <div id="calendar"></div>
+    <script src="dashboard.js"></script>
+    <div id="add">
+    <h3 id="config">Configuration:</h3>
+    <p id="ify" class="adding">Input new fiscal year: </p>
+    <input      class="adding"  type="text" id="add-fy">
+    <p id="ism" class="adding" >Input new Semester: </p>
+    <input      class="adding"    type="text" id="add-sm">
+    <button>Add</button>
+    </div>
+</main>
+    
+    </div>
+    <script>
+        // Confirm logout when the user clicks the "Log out" link
+        document.getElementById('logout').addEventListener('click', function(event) {
+            event.preventDefault(); // Prevent default link action
+            const confirmLogout = confirm("Are you sure you want to log out?");
+            if (confirmLogout) {
+                window.location.href = this.href; // Proceed with logout
+            }
+        });
+    </script>
+</body>
+</html>

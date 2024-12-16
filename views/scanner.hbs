@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Barcode Attendance Tracker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    table, th, td {
+      border: 1px solid #ddd;
+    }
+    th, td {
+      text-align: center;
+      padding: 8px;
+    }
+    th {
+      background-color: #f4f4f4;
+    }
+    #output {
+      font-size: 1.2em;
+      color: #555;
+      margin-bottom: 10px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    button {
+      padding: 8px 16px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-right: 5px;
+    }
+    button:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80%;
+      max-width: 600px;
+      background-color: white;
+      border: 1px solid #ddd;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      padding: 20px;
+      z-index: 1000;
+    }
+    .modal.open {
+      display: block;
+    }
+    .modal-header {
+      font-size: 1.5em;
+      margin-bottom: 10px;
+    }
+    .modal-body {
+      margin-bottom: 10px;
+    }
+    .modal-footer {
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+
+   <!-- Back Button to go back to the attendance page with fiscal year context -->
+  <button onclick="window.location.href='/dashboard-attendance?fiscalYear={{fiscalYear}}'">Back</button>
+
+  <h1>Barcode Attendance Tracker</h1>
+
+
+  <div class="form-group">
+    <label for="scheduledTime">Enter Scheduled Time (HH:MM, 12-hour format with AM/PM):</label>
+    <input type="time" id="scheduledTime" pattern="(0[1-9]|1[0-2]):[0-5][0-9](?:AM|PM)">
+    <button id="startScanning" disabled>Start Scanning</button>
+    <button id="finalizeTimeIn" disabled>Finalize Time-in</button>
+    <button id="startTimeOut" disabled>Start Time Out</button>
+    <button id="finalizeAttendance" disabled>Finalize Attendance</button>
+    <button id="viewHistory">View Attendance History</button>
+    <button id="newAttendance">New Attendance</button>
+  </div>
+
+  <p id="output">Enter the scheduled time to begin scanning.</p>
+  
+  <table>
+    <thead>
+      <tr>
+        <th>Student Number</th>
+        <th>Time In</th>
+        <th>Remarks</th>
+        <th>Time Out</th>
+      </tr>
+    </thead>
+    <tbody id="logTable">
+      <!-- Rows will be added dynamically here -->
+    </tbody>
+  </table>
+
+  <!-- Attendance History Modal -->
+  <div id="historyModal" class="modal">
+    <div class="modal-header">Attendance History</div>
+    <div class="modal-body">
+      <ul id="historyList"></ul>
+    </div>
+    <div class="modal-footer">
+      <button id="closeHistory">Close</button>
+    </div>
+  </div>
+
+  <script>
+    const output = document.getElementById('output');
+    const logTable = document.getElementById('logTable');
+    const scheduledTimeInput = document.getElementById('scheduledTime');
+    const startScanningButton = document.getElementById('startScanning');
+    const finalizeTimeInButton = document.getElementById('finalizeTimeIn');
+    const startTimeOutButton = document.getElementById('startTimeOut');
+    const finalizeAttendanceButton = document.getElementById('finalizeAttendance');
+    const viewHistoryButton = document.getElementById('viewHistory');
+    const newAttendanceButton = document.getElementById('newAttendance');
+    const historyModal = document.getElementById('historyModal');
+    const historyList = document.getElementById('historyList');
+    const closeHistoryButton = document.getElementById('closeHistory');
+
+    let barcode = '';
+    let logData = {};
+    let isScanningEnabled = false;
+    let isTimeOutEnabled = false;
+    let attendanceHistory = [];
+
+    scheduledTimeInput.addEventListener('input', () => {
+      startScanningButton.disabled = !scheduledTimeInput.value;
+    });
+
+    startScanningButton.addEventListener('click', () => {
+      isScanningEnabled = true;
+      output.textContent = 'Scanning started. Ready to scan barcodes.';
+      startScanningButton.disabled = true;
+      finalizeTimeInButton.disabled = false;
+    });
+
+    finalizeTimeInButton.addEventListener('click', () => {
+      isScanningEnabled = false;
+      finalizeTimeInButton.disabled = true;
+      startTimeOutButton.disabled = false;
+      output.textContent = 'Attendance finalized. Press "Start Time Out" to begin time-out scanning.';
+    });
+
+    startTimeOutButton.addEventListener('click', () => {
+      isTimeOutEnabled = true;
+      startTimeOutButton.disabled = true;
+      finalizeAttendanceButton.disabled = false;
+      output.textContent = 'Time-out scanning started. Ready to scan barcodes for time out.';
+    });
+
+    finalizeAttendanceButton.addEventListener('click', () => {
+      const today = new Date();
+      const dateString = today.toISOString().split('T')[0];
+      const scheduledTime = scheduledTimeInput.value;
+
+      // Convert scheduled time to 12-hour format
+      const formattedScheduledTime = formatTimeTo12Hour(scheduledTime);
+
+      const recordName = `${dateString} - ${formattedScheduledTime}`;
+      attendanceHistory.push({ name: recordName, data: { ...logData } });
+
+      for (const barcode in logData) {
+        if (!logData[barcode].timeOut) {
+          logData[barcode].timeOut = formatTime(today);
+          updateTimeOutInTable(barcode);
+        }
+      }
+      
+      output.textContent = 'Attendance finalized and saved to history.';
+    });
+
+    viewHistoryButton.addEventListener('click', () => {
+      historyList.innerHTML = attendanceHistory
+        .map((record, index) => `
+          <li>
+            <strong>${record.name}</strong>
+            <button onclick="saveHistory(${index})">Save</button>
+            <button onclick="deleteHistory(${index})">Delete</button>
+          </li>
+        `)
+        .join('');
+      historyModal.classList.add('open');
+    });
+
+    newAttendanceButton.addEventListener('click', () => {
+      logData = {};
+      logTable.innerHTML = '';
+      output.textContent = 'New attendance created. Enter the scheduled time to begin.';
+      startScanningButton.disabled = true;
+      finalizeTimeInButton.disabled = true;
+      startTimeOutButton.disabled = true;
+      finalizeAttendanceButton.disabled = true;
+    });
+
+    closeHistoryButton.addEventListener('click', () => {
+      historyModal.classList.remove('open');
+    });
+
+     document.addEventListener('keydown', async (event) => {
+    if (event.key === 'Enter') {
+      if (barcode) {
+        try {
+          const studentNumber = await fetchStudentNumber(barcode);
+          const currentTime = getCurrentTime();
+
+          if (isScanningEnabled) {
+            const scheduledTime = scheduledTimeInput.value;
+            const remarks = evaluateRemarks(scheduledTime, currentTime);
+
+            if (!logData[studentNumber]) {
+              logData[studentNumber] = { timeScanned: currentTime, remarks, timeOut: '' };
+              addTableRow(studentNumber);
+            } else {
+              output.textContent = `Student Number "${studentNumber}" already scanned for time-in.`;
+            }
+          } else if (isTimeOutEnabled) {
+            if (logData[studentNumber]) {
+              logData[studentNumber].timeOut = currentTime;
+              updateTimeOutInTable(studentNumber);
+            } else {
+              output.textContent = `Error: Student Number "${studentNumber}" not found in the attendance list.`;
+            }
+          }
+
+          output.textContent = `Scanned: ${studentNumber}`;
+        } catch (error) {
+          output.textContent = `Error: Unable to fetch student number for the barcode".`;
+        }
+        barcode = '';
+      }
+    } else if (!isNaN(event.key)) {
+      barcode += event.key;
+    }
+  });
+
+  async function fetchStudentNumber(barcode) {
+    const response = await fetch(`/api/getStudentNumber?barcode=${barcode}`);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch student number for barcode`);
+    }
+    const data = await response.json();
+    return data.studentNumber;
+  }
+
+  function addTableRow(studentNumber) {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${studentNumber}</td>
+      <td>${logData[studentNumber].timeScanned}</td>
+      <td>${logData[studentNumber].remarks}</td>
+      <td></td>
+    `;
+    logTable.appendChild(row);
+  }
+
+  function updateTimeOutInTable(studentNumber) {
+    const rows = logTable.querySelectorAll('tr');
+    rows.forEach(row => {
+      const studentNumberCell = row.querySelector('td:first-child');
+      if (studentNumberCell && studentNumberCell.textContent === studentNumber) {
+        const timeOutCell = row.querySelector('td:last-child');
+        timeOutCell.textContent = logData[studentNumber].timeOut;
+      }
+    });
+  }
+    function getCurrentTime() {
+      const currentTime = new Date();
+      let hours = currentTime.getHours();
+      const minutes = currentTime.getMinutes();
+      const period = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12;
+      hours = hours ? hours : 12; // the hour '0' should be '12'
+      return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} ${period}`;
+    }
+
+    function formatTimeTo12Hour(time) {
+      const [hours, minutes] = time.split(':');
+      let period = 'AM';
+      let hour = parseInt(hours, 10);
+
+      if (hour >= 12) {
+        period = 'PM';
+        hour = hour > 12 ? hour - 12 : hour;
+      } else if (hour === 0) {
+        hour = 12;
+      }
+
+      return `${hour.toString().padStart(2, '0')}:${minutes} ${period}`;
+    }
+
+    function addTableRow(barcode) {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${barcode}</td>
+        <td>${logData[barcode].timeScanned}</td>
+        <td>${logData[barcode].remarks}</td>
+        <td></td>
+      `;
+      logTable.appendChild(row);
+    }
+
+    function updateTimeOutInTable(barcode) {
+      const rows = logTable.querySelectorAll('tr');
+      rows.forEach(row => {
+        const studentNumberCell = row.querySelector('td:first-child');
+        if (studentNumberCell && studentNumberCell.textContent === barcode) {
+          const timeOutCell = row.querySelector('td:last-child');
+          timeOutCell.textContent = logData[barcode].timeOut;
+        }
+      });
+    }
+
+    function evaluateRemarks(scheduledTime, currentTime) {
+      const [scheduledHours, scheduledMinutes] = scheduledTime.split(':');
+      const [currentHours, currentMinutes] = currentTime.split(':');
+
+      const scheduledDate = new Date();
+      scheduledDate.setHours(scheduledHours, scheduledMinutes);
+      const currentDate = new Date();
+      currentDate.setHours(currentHours, currentMinutes);
+
+      return currentDate > scheduledDate ? 'Late' : 'On Time';
+    }
+
+    function saveHistory(index) {
+      const history = attendanceHistory[index];
+      const filename = history.name.replace(/\//g, '_') + '.csv';
+
+      // Convert the attendance data to CSV format
+      const csvData = convertToCSV(history.data);
+      const blob = new Blob([csvData], { type: 'text/csv' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      link.click();
+    }
+
+    function convertToCSV(data) {
+      const headers = ['Student Number', 'Time In', 'Remarks', 'Time Out']; // Column headers
+      const rows = [];
+
+      // Extract rows of data
+      for (const barcode in data) {
+        const row = data[barcode];
+        rows.push([
+          barcode, // Student Number
+          row.timeScanned, // Time In
+          row.remarks, // Remarks
+          row.timeOut // Time Out
+        ]);
+      }
+
+      // Combine headers and rows into a CSV string
+      const csv = [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
+      return csv;
+    }
+
+    function deleteHistory(index) {
+      attendanceHistory.splice(index, 1);
+      viewHistoryButton.click();
+    }
+
+    
+  </script>
+</body>
+</html>

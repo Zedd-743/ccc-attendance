@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Professor Dashboard - Attendance</title>
+    <link rel="stylesheet" href="attendance.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <script>
+        const fiscalYear = "{{fiscalYear}}";  // Handlebars will inject the fiscal year here
+        console.log('Fiscal Year in JS:', fiscalYear); // This should show the correct value in the console
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Navbar Section -->
+    <header>
+        <nav>
+            <a href="/dashboard"><img src="images/logo.png" alt="Logo" class="logo"></a>
+            <span class="welcome-text">Welcome, {{professorName}}</span> <!-- Dynamic professor name insertion -->
+        </nav>
+    </header>
+
+    <!-- Main Dashboard Container with Flexbox layout -->
+    <div class="dashboard-container">
+        <!-- Sidebar Menu -->
+        <aside class="sidebar">
+            <ul>
+                <li class="sidebar-item"><a href="/dashboard">Dashboard</a></li>
+                <li class="sidebar-item"><a href="/schedule">Schedule</a></li>
+                <li class="sidebar-item"><a href="/dashboard-attendance">Attendance</a></li>
+                <li class="sidebar-item"><a href="/scanner">Scanner</a></li>
+                <li class="sidebar-item"><a href="/student-list">Student List</a></li>
+                <li class="sidebar-item"><a href="/logout" id="logout">Log out</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <h2>Attendance Management</h2>
+
+            <!-- Upload Section -->
+            <section id="uploadSection">
+                <h3>Upload Attendance CSV File</h3>
+                <form id="uploadForm" enctype="multipart/form-data">
+                    <label for="csvFile">Upload Attendance File:</label>
+                    <input type="file" id="csvFile" name="csvFile" accept=".csv" required>
+                    <button type="submit">Upload</button>
+                    <div id="loader" style="display: none;">Uploading...</div> <!-- Loader -->
+                </form>
+                <div id="uploadMessage"></div> <!-- Feedback message -->
+            </section>
+
+            <!-- Dynamic Table for Uploaded Data -->
+            <section id="dynamicTableSection">
+                <h3>Uploaded Attendance Records</h3>
+                <p id="uploadIndicator">This table displays the data from the uploaded file.</p>
+                <div class="table-container">
+                    <table class="styled-table">
+                        <thead>
+                            <tr>
+                                <th>Student Number</th>
+                                <th>Name</th>
+                                <th>Time In</th>
+                                <th>Time Out</th>
+                                <th>Status</th>
+                                <th>Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody id="uploadedAttendanceRecords">
+                            <!-- Dynamic content for uploaded attendance -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Filter and Table Section (Flexbox layout) -->
+            <section class="table-and-filters">
+                <!-- Filter Sidebar Section -->
+                <aside class="filter-sidebar">
+                    <h3>Filter Options</h3>
+                    <label for="subject-dropdown">Subject</label>
+                    <select id="subject-dropdown">
+                        <option value="">Select Subject</option>
+                        {{#each subjects}}  <!-- Handlebars loop for subjects -->
+                            <option value="{{this.subject_id}}">{{this.subject_name}}</option>
+                        {{/each}}
+                    </select>
+
+                    <label for="section-dropdown">Section</label>
+                    <select id="section-dropdown" disabled>
+                        <option value="">Select Section</option>
+                    </select>
+                </aside>
+
+                <!-- Attendance Records Section -->
+                <section class="table-section">
+                    <h3>Attendance Records</h3>
+                    <div class="table-container">
+                        <table class="styled-table">
+                            <thead>
+                                <tr>
+                                    <th>Student Number</th> <!-- Updated to reflect student number -->
+                                    <th>Name</th>
+                                    <th>Time In</th>
+                                    <th>Time Out</th>
+                                    <th>Status</th>
+                                    <th>Remarks</th>
+                                </tr>
+                            </thead>
+                            <tbody id="attendanceRecords">
+                                {{#each attendanceRecords}}  <!-- Handlebars loop for attendance records -->
+                                    <tr>
+                                        <td>{{student_number}}</td>
+                                        <td>{{student_name}}</td>
+                                        <td>{{time_in}}</td>
+                                        <td>{{time_out}}</td>
+                                        <td>{{status}}</td>
+                                        <td>{{remarks}}</td>
+                                    </tr>
+                                {{/each}}
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </section>
+
+            <!-- Analytics Section -->
+            <section id="analyticsSection">
+                <h3>Attendance Analytics</h3>
+                <button id="toggleChartButton" style="margin-bottom: 20px;">View Pie Chart</button>
+
+                <div id="barChartContainer">
+                    <canvas id="attendanceChart" style="width: 600px; height: 400px;"></canvas>
+                </div>
+
+                <div id="pieChartContainer" style="display: none;">
+                    <canvas id="attendancePieChart" style="width: 600px; height: 400px;"></canvas>
+                </div>
+            </section>
+
+            <!-- Range and Download Section -->
+            <section id="exportAttendanceSection">
+                <h3>Download Attendance Records</h3>
+<!-- Date Range Selection -->
+<!-- Date Range Selection -->
+<div>
+    <label for="rangeSelect">Select Date Range:</label>
+    <select id="rangeSelect">
+        <option value="">Select Range</option>
+        <option value="day">Day</option>
+        <option value="week">Week</option>
+        <option value="month">Month</option>
+        <option value="year">Year</option>
+    </select>
+</div>
+
+<!-- Date or Range Pickers -->
+<div id="dateSelectors" style="display: none;">
+    <!-- Day picker -->
+    <div id="dayPicker" style="display: none;">
+        <label for="day">Select Day:</label>
+        <input type="date" id="day" />
+    </div>
+
+    <!-- Week picker -->
+    <div id="weekPicker" style="display: none;">
+        <label for="week">Select Week (Start Date):</label>
+        <input type="date" id="week" />
+    </div>
+
+    <!-- Month picker -->
+    <div id="monthPicker" style="display: none;">
+        <label for="month">Select Month:</label>
+        <input type="month" id="month" />
+    </div>
+
+    <!-- Year picker -->
+    <div id="yearPicker" style="display: none;">
+        <label for="year">Select Year:</label>
+        <input type="number" id="year" min="2000" max="2099" step="1" />
+    </div>
+</div>
+
+<!-- Download Buttons -->
+<div>
+    <button id="downloadCSV">Download as CSV</button>
+    <button id="downloadPDF">Download as PDF</button>
+</div>
+
+
+        </main>
+    </div>
+
+    <!-- External JS File -->
+    <script src="/attendance.js"></script>
+</body>
+</html>

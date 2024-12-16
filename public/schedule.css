@@ -1,0 +1,286 @@
+/* Body Styling */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f0f8ff; /* Light background for contrast */
+}
+
+/* Header and Navigation Bar Styling */
+header nav {
+    display: flex;
+    align-items: center;
+    background-color: #007BFF; /* Blue theme */
+    padding: 10px;
+    color: white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Slight shadow for depth */
+}
+
+/* Logo Styling */
+header nav .logo {
+    height: 40px;
+    margin-right: 10px;
+}
+
+/* Welcome Text Area in Header */
+header nav .welcome-text {
+    flex-grow: 1;
+    text-align: right;
+}
+
+/* Dashboard Container: Flexbox Layout */
+.dashboard-container {
+    display: flex;
+    height: calc(100vh - 60px); /* Full height minus navbar */
+    gap: 20px;
+}
+
+/* Main Content Area Styling */
+.main-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Schedule Layout Container */
+.schedule-layout {
+    display: flex;
+    justify-content: space-between; /* Space out the sidebars and table */
+    gap: 20px;
+    width: 100%;
+}
+
+/* Sidebar for Subjects */
+.table-sidebar {
+    width: 350px; /* Sidebar width */
+    background-color: #f4faff; /* Light background */
+    padding: 20px;
+    border-radius: 8px; /* Slightly more rounded corners for a softer look */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    max-height: 100%; /* Full height of content */
+    overflow-y: auto; /* Scroll if needed */
+    flex-shrink: 0; /* Prevent sidebar from shrinking */
+    border: 1px solid #d1e6f3; /* Light border to add separation */
+}
+
+/* Heading for the sidebar */
+.table-sidebar h3 {
+    color: #0056b3; /* Dark blue for headings */
+    font-size: 18px; /* Slightly larger text */
+    margin-bottom: 15px; /* Space below the heading */
+    font-weight: bold;
+    border-bottom: 2px solid #007BFF; /* Blue underline for the heading */
+    padding-bottom: 5px;
+}
+
+/* Sidebar List for Subjects */
+.table-sidebar ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* Sidebar Item Styling for Each Subject */
+.table-sidebar .sidebar-item {
+    background-color: #007BFF; /* Blue background for items */
+    color: white;
+    padding: 12px 15px; /* Slightly more padding */
+    margin: 8px 0; /* Increased margin for better spacing */
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s, transform 0.2s; /* Smooth transition */
+    text-align: center; /* Center text inside the items */
+}
+
+/* Hover Effect for Sidebar Items */
+.table-sidebar .sidebar-item:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+    transform: scale(1.05); /* Slight scaling effect */
+}
+
+/* Active Item Styling (when clicked or selected) */
+.table-sidebar .sidebar-item.active {
+    background-color: #0056b3; /* Darker blue when active */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); /* Slight shadow effect for active item */
+}
+
+/* Responsive Styling */
+@media (max-width: 768px) {
+    /* Adjustments for smaller screens */
+    .table-sidebar {
+        width: 200px; /* Slightly narrower on mobile */
+        padding: 15px; /* Less padding */
+    }
+
+    .table-sidebar h3 {
+        font-size: 16px; /* Slightly smaller font size for headings */
+    }
+
+    .table-sidebar .sidebar-item {
+        padding: 10px; /* Less padding on smaller screens */
+    }
+}
+/* Schedule Table Container */
+.schedule-table-container {
+    flex-grow: 1; /* Takes available space */
+    overflow-x: auto;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    padding: 15px; /* Add some padding around the table */
+}
+
+/* Styling for the Table itself */
+.schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #f9f9f9; /* Light background for the table */
+}
+
+/* Table Header Styling */
+.schedule-table th {
+    background-color: #007BFF; /* Blue background for header */
+    color: white;
+    padding: 15px;
+    font-size: 16px;
+    text-align: center;
+    border: 1px solid #007BFF;
+}
+
+/* Table Cell Styling */
+.schedule-table td {
+    padding: 12px;
+    text-align: center;
+    border: 1px solid #d1e6f3; /* Light border for cells */
+    font-size: 14px;
+    background-color: #ffffff; /* White background for table cells */
+    transition: background-color 0.3s, transform 0.2s; /* Smooth hover effects */
+}
+
+/* Hover Effect for Table Cells */
+.schedule-table td:hover {
+    background-color: #e0e0e0; /* Light grey background on hover */
+    transform: scale(1.02); /* Slight scaling effect */
+}
+
+/* Styling for Calendar Cells */
+.schedule-cell {
+    cursor: pointer;
+    padding: 10px;
+    background-color: #ffffff; /* White background */
+    border: 1px solid #e0e0e0;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+/* Hover Effect for Calendar Cells */
+.schedule-cell:hover {
+    background-color: #007BFF; /* Blue hover effect */
+    color: white; /* Change text color to white when hovered */
+    transform: scale(1.05); /* Slight zoom effect */
+}
+
+/* Selected Calendar Cell */
+.schedule-cell.selected {
+    background-color: #0056b3; /* Darker blue for selected cells */
+    color: white; /* White text for selected cells */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); /* Soft shadow for selected state */
+}
+
+/* Save and Download Button Styling */
+.save-button {
+    background-color: #007BFF; /* Blue theme */
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: background-color 0.3s;
+    width: 100%; /* Full-width button */
+}
+
+/* Hover Effect for Save Button */
+.save-button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
+
+/* Style for editable cells */
+.schedule-cell.editable {
+    background-color: #f0f8ff; /* Light background for editable cells */
+    cursor: pointer;
+}
+
+/* Style for saved cells to indicate changes were made */
+.schedule-cell.saved {
+    background-color: #d3ffd3; /* Light green for saved cells */
+}
+
+/* Background color based on session type */
+.schedule-cell[data-session="Lecture"] {
+    background-color: #a2d8f7; /* Light blue for lecture */
+}
+
+.schedule-cell[data-session="Laboratory"] {
+    background-color: #f7e6a2; /* Light yellow for lab */
+}
+
+/* Styling for input fields in "Free" cells */
+.schedule-cell input {
+    width: 100%;
+    padding: 5px;
+    border: 1px solid #ccc;
+}
+.sidebar-item.active {
+    background-color: #d1e7dd; /* Light green for active item */
+    color: #0f5132; /* Dark green for text */
+    font-weight: bold;
+}
+
+.reset-filter {
+    color: #007bff; /* Blue for "Show All" */
+    cursor: pointer;
+}
+
+
+/* Responsive Styling for Table */
+@media (max-width: 768px) {
+    .schedule-table th, .schedule-table td {
+        padding: 8px; /* Less padding on smaller screens */
+    }
+
+    .schedule-table-container {
+        padding: 10px; /* Less padding around the table */
+    }
+}
+
+
+
+/* Style the buttons inside the sidebar */
+#manageSubjectButton, #manageSectionButton {
+    padding: 10px;
+    background-color: #ddd;
+    border: none;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+#manageSubjectButton:hover, #manageSectionButton:hover {
+    background-color: #bbb;
+}
+
+/* Style the table inside the sidebar */
+#manageTable-manager, #manageTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+#manageTable-manager th, #manageTable th {
+    padding: 10px;
+    text-align: left;
+    border: 1px solid #ddd;
+}
+
+#manageTable-manager td {
+    padding: 8px;
+}

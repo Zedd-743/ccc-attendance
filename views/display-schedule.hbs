@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editable Weekly Schedule</title>
+    <link rel="stylesheet" href="/boardstyle.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <img src="images/ccclogo.png" alt="Logo" class="logo">
+            <span class="welcome-text">Editable Weekly Schedule</span>
+        </nav>
+    </header>
+
+    <main class="main-content">
+        <!-- Dropdown for selecting a day -->
+        <section class="schedule-selector">
+            <h2>Select a Day</h2>
+            <select id="daySelector">
+                <option value="Monday">Monday</option>
+                <option value="Tuesday">Tuesday</option>
+                <option value="Wednesday">Wednesday</option>
+                <option value="Thursday">Thursday</option>
+                <option value="Friday">Friday</option>
+            </select>
+        </section>
+
+        <!-- Schedule Display Section -->
+        <section class="schedule-display">
+            <h2>Day's Schedule</h2>
+            <div id="scheduleDisplay">
+                <p>Select a day to view or edit the schedule.</p>
+            </div>
+        </section>
+
+        <!-- Add/Edit Subject Form -->
+        <section class="subject-form">
+            <h2>Add or Edit a Subject</h2>
+            <form id="subjectForm">
+                <input type="hidden" id="editIndex" value=""> <!-- For editing existing subjects -->
+                <label>
+                    Subject Name:
+                    <input type="text" id="subjectName" required>
+                </label>
+                <label>
+                    Start Time:
+                    <input type="time" id="startTime" required>
+                </label>
+                <label>
+                    End Time:
+                    <input type="time" id="endTime" required>
+                </label>
+                <button type="submit">Save Subject</button>
+            </form>
+        </section>
+
+        <!-- Download Schedule -->
+        <form id="downloadForm" action="/download-schedule" method="get" target="_blank">
+            <input type="hidden" name="day" value="">
+            <button type="submit" class="download-button">Download Day's Schedule</button>
+        </form>
+    </main>
+
+    <script>
+        // Mock Data (This should ideally come from your server)
+        const weekSchedule = {
+            Monday: [
+                { subject_name: "Math", session_start: "09:00", session_end: "10:00" },
+                { subject_name: "Science", session_start: "10:15", session_end: "11:15" }
+            ],
+            Tuesday: [
+                { subject_name: "English", session_start: "09:00", session_end: "10:00" }
+            ],
+            Wednesday: [],
+            Thursday: [],
+            Friday: []
+        };
+
+        // Current day selected
+        let currentDay = "Monday";
+
+        // Display the schedule for the selected day
+        const renderSchedule = () => {
+            const scheduleDisplay = document.getElementById("scheduleDisplay");
+            const subjects = weekSchedule[currentDay] || [];
+            if (subjects.length === 0) {
+                scheduleDisplay.innerHTML = "<p>No subjects scheduled for this day.</p>";
+                return;
+            }
+
+            scheduleDisplay.innerHTML = `
+                <ul>
+                    ${subjects
+                        .map(
+                            (subject, index) => `
+                            <li>
+                                <strong>${subject.subject_name}</strong>: ${subject.session_start} - ${subject.session_end}
+                                <button onclick="editSubject(${index})">Edit</button>
+                                <button onclick="deleteSubject(${index})">Delete</button>
+                            </li>`
+                        )
+                        .join("")}
+                </ul>
+            `;
+        };
+
+        // Handle day selection
+        document.getElementById("daySelector").addEventListener("change", (e) => {
+            currentDay = e.target.value;
+            renderSchedule();
+        });
+
+        // Add/Edit Subject
+        document.getElementById("subjectForm").addEventListener("submit", (e) => {
+            e.preventDefault();
+
+            const subjectName = document.getElementById("subjectName").value;
+            const startTime = document.getElementById("startTime").value;
+            const endTime = document.getElementById("endTime").value;
+            const editIndex = document.getElementById("editIndex").value;
+
+            const newSubject = {
+                subject_name: subjectName,
+                session_start: startTime,
+                session_end: endTime
+            };
+
+            if (editIndex) {
+                // Edit existing subject
+                weekSchedule[currentDay][editIndex] = newSubject;
+            } else {
+                // Add new subject
+                weekSchedule[currentDay].push(newSubject);
+            }
+
+            // Clear form
+            document.getElementById("subjectForm").reset();
+            document.getElementById("editIndex").value = "";
+
+            renderSchedule();
+        });
+
+        // Edit Subject
+        const editSubject = (index) => {
+            const subject = weekSchedule[currentDay][index];
+            document.getElementById("subjectName").value = subject.subject_name;
+            document.getElementById("startTime").value = subject.session_start;
+            document.getElementById("endTime").value = subject.session_end;
+            document.getElementById("editIndex").value = index;
+        };
+
+        // Delete Subject
+        const deleteSubject = (index) => {
+            weekSchedule[currentDay].splice(index, 1);
+            renderSchedule();
+        };
+
+        // Handle schedule download
+        document.getElementById("downloadForm").addEventListener("submit", (e) => {
+            document.querySelector('input[name="day"]').value = currentDay;
+        });
+
+        // Initial render
+        renderSchedule();
+    </script>
+</body>
+</html>

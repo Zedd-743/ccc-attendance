@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professor Dashboard - Student List</title>
+    <link rel="stylesheet" href="boardstyle.css">
+    <link rel="stylesheet" href="student-list.css">
+</head>
+<body>
+   <script>
+    const fiscalYear = "{{fiscalYear}}";  // Handlebars will inject the fiscal year here
+    console.log('Fiscal Year in JS:', fiscalYear); // This should show the correct value in the console
+</script>
+
+
+
+    <header>
+        <nav>
+            <a href="/dashboard"><img src="images/logo.png" alt="Logo" class="logo"></a>
+            <span class="welcome-text">Welcome, {{professorName}}</span>
+        </nav>
+    </header>
+
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <ul>
+                 <li class="sidebar-item"><a href="/dashboard">Dashboard</a></li>
+                <li class="sidebar-item"><a href="/schedule">Schedule</a></li>
+                <li class="sidebar-item"><a href="/dashboard-attendance">Attendance</a></li>
+                <li class="sidebar-item"><a href="/scanner">Scanner</a></li>
+                <li class="sidebar-item"><a href="/student-list">Student List</a></li>
+                <li class="sidebar-item"><a href="/logout" id="logout">Log out</a></li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <h2>Student List</h2>
+
+            <div class="schedule-layout">
+                <aside class="table-sidebar">
+                    <h3>Filters</h3>
+
+                    <label for="subject-select">Subject</label>
+                    <select id="subject-select" onchange="loadSections()">
+                        <option value="">Select Subject</option>
+                        {{#each subjects}}
+                            <option value="{{this.subject_name}}">{{this.subject_name}}</option>
+                        {{/each}}
+                    </select>
+
+                    <label for="section-select">Section</label>
+                    <select id="section-select" onchange="loadSessions()" disabled>
+                        <option value="">Select Section</option>
+                    </select>
+                    <div id="section-loading" style="display: none;">Loading sections...</div>
+
+                    <label for="session-select">Session</label>
+                    <select id="session-select" onchange="loadStudentList()" disabled>
+                        <option value="">Select Session</option>
+                    </select>
+                    <div id="session-loading" style="display: none;">Loading sessions...</div>
+
+                </aside>
+
+                <div class="schedule-table-container">
+                    <div class="search-container">
+                        <input type="text" id="search-bar" placeholder="Search by Student Name">
+                        <button onclick="searchStudent()">Search</button>
+                    </div>
+
+                    <table class="student-table">
+                        <thead>
+                            <tr>
+                                <th>Student Number</th>
+                                <th>Name</th>
+                                <th>Date</th>
+                                <th>Log In</th>
+                                <th>Log Out</th>
+                                <th>Barcode</th>
+                            </tr>
+                        </thead>
+                        <tbody id="student-list-body">
+                            <!-- Dynamically populated rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="student-list.js"></script>
+</body>
+</html>

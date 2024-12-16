@@ -1,0 +1,114 @@
+/* Styling for the main content and layout */
+.schedule-layout {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+}
+
+/* Sidebar Styling */
+.table-sidebar {
+    width: 250px;
+    background-color: #f4faff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border: 1px solid #d1e6f3;
+}
+
+/* Container for the student table */
+.schedule-table-container {
+    flex-grow: 1;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Search bar container */
+.search-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+/* Search bar input */
+#search-bar {
+    flex-grow: 1;
+    padding: 12px;
+    border: 1px solid #d1e6f3;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+/* Search button */
+.search-container button {
+    padding: 12px 20px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.search-container button:hover {
+    background-color: #0056b3;
+}
+
+/* Styling for the student table */
+.student-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #f9f9f9;
+}
+
+.student-table th {
+    background-color: #007BFF;
+    color: white;
+    padding: 15px;
+    font-size: 16px;
+    border: 1px solid #007BFF;
+    text-align: center;
+}
+
+.student-table td {
+    padding: 12px;
+    border: 1px solid #d1e6f3;
+    text-align: center;
+    background-color: #ffffff;
+    font-size: 14px;
+}
+
+.student-table tbody tr:nth-child(odd) {
+    background-color: #f4faff;
+}
+
+.student-table tbody tr:hover {
+    background-color: #e0e0e0;
+    transform: scale(1.02);
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .table-sidebar {
+        width: 200px;
+    }
+
+    #search-bar {
+        padding: 10px;
+    }
+
+    .student-table th,
+    .student-table td {
+        padding: 8px;
+        font-size: 12px;
+    }
+
+    .search-container button {
+        padding: 10px 15px;
+        font-size: 12px;
+    }
+}
